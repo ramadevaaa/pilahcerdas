@@ -1,0 +1,104 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  :root {
+    --green-primary:  #2d7a4f;  /* Aksen Utama */
+    --green-dark:     #1a4a30;  /* Heading, teks judul */
+    --green-light:    #e8f5ee;  /* Background kartu */
+    --green-bg:       #f5faf7;  /* Background halaman */
+    --yellow-accent:  #f5a623;  /* Badge, notifikasi */
+    --orange-alert:   #e05c2a;  /* Peringatan, dampak tinggi */
+    --text-primary:   #1a4a30;
+    --text-secondary: #666666;
+    --text-muted:     #aaaaaa;
+  }
+
+  body {
+    background: var(--green-bg);
+    color: var(--green-dark);
+    font-family: Inter, Nunito, sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--green-dark);
+    font-family: Outfit, sans-serif;
+    font-weight: 700;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e8f5ee;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2d7a4f;
+}
+
+/* Glassmorphism Classes */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(45, 122, 79, 0.08);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(45, 122, 79, 0.05);
+}
+
+/* Page Transition micro-animation */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-slide {
+  animation: fadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Modal entry animations */
+@keyframes modalBackdropFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalContentFadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-backdrop-fade {
+  animation: modalBackdropFade 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-modal-content {
+  animation: modalContentFadeSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

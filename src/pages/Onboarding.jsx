@@ -22,7 +22,7 @@ export function Onboarding({ onComplete, saveRegency }) {
       <div className="w-full max-w-md bg-white md:shadow-premium md:border md:border-brand-primary/5 md:rounded-4xl p-6 md:p-10 flex flex-col justify-between min-h-[85vh] md:min-h-0 md:space-y-8">
         {/* Upper Logo / Title */}
         <div className="flex flex-col items-center mt-2">
-          <img src="/logo-pilahcerdas.svg" alt="PilahCerdas Logo" className="w-16 h-16 rounded-3xl shadow-premium mb-3" />
+          <img src="/logo.svg" alt="PilahCerdas Logo" className="w-16 h-16 rounded-3xl shadow-premium mb-3" />
           <h1 className="text-3xl font-extrabold text-brand-dark tracking-tight font-display">
             Pilah<span className="text-brand-primary">Cerdas</span>
           </h1>

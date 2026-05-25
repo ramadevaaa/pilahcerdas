@@ -1,5 +1,5 @@
-import React from 'react';
-import { Users, Trash2, Zap, TreePine, TrendingUp, Award } from 'lucide-react';
+import React, { useState } from 'react';
+import { Users, Trash2, Zap, TreePine, TrendingUp, Award, Calendar } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { BaliMap } from '../components/features/BaliMap';
 
@@ -13,11 +13,23 @@ function AnimatedCounter({ value, suffix = '', decimals = 0 }) {
 }
 
 export function Komunitas({ stats, regencyStats, loading }) {
+  const [activeRange, setActiveRange] = useState('total'); // 'harian' | 'mingguan' | 'bulanan' | 'total'
+
+  const scaleFactor = activeRange === 'harian' ? 0.03 : activeRange === 'mingguan' ? 0.22 : activeRange === 'bulanan' ? 0.85 : 1.0;
+  
+  const scaledStats = {
+    total_kontributor: stats.total_kontributor,
+    total_kg: stats.total_kg * scaleFactor,
+    total_kwh: stats.total_kwh * scaleFactor,
+    total_co2e: stats.total_co2e * scaleFactor,
+    total_logs: Math.round((stats.total_logs || 0) * scaleFactor)
+  };
+
   const counters = [
     {
       icon: Users,
       label: 'Kontributor',
-      value: stats.total_kontributor,
+      value: scaledStats.total_kontributor,
       suffix: 'orang',
       color: 'text-brand-primary',
       bg: 'bg-brand-light',
@@ -25,7 +37,7 @@ export function Komunitas({ stats, regencyStats, loading }) {
     {
       icon: Trash2,
       label: 'Sampah Terpilah',
-      value: stats.total_kg,
+      value: scaledStats.total_kg,
       suffix: 'kg',
       decimals: 1,
       color: 'text-brand-primary',
@@ -34,7 +46,7 @@ export function Komunitas({ stats, regencyStats, loading }) {
     {
       icon: Zap,
       label: 'Potensi Listrik',
-      value: stats.total_kwh,
+      value: scaledStats.total_kwh,
       suffix: 'kWh',
       decimals: 2,
       color: 'text-brand-yellow',
@@ -43,7 +55,7 @@ export function Komunitas({ stats, regencyStats, loading }) {
     {
       icon: TreePine,
       label: 'Emisi CO₂e Dicegah',
-      value: stats.total_co2e,
+      value: scaledStats.total_co2e,
       suffix: 'kg',
       decimals: 2,
       color: 'text-sampah-organik',
@@ -57,7 +69,7 @@ export function Komunitas({ stats, regencyStats, loading }) {
     .sort((a, b) => b.total_kg - a.total_kg);
 
   return (
-    <div className="px-5 pt-6 pb-36 md:pb-12 max-w-lg lg:max-w-6xl mx-auto space-y-6">
+    <div className="px-5 pt-12 pb-36 md:pt-20 md:pb-12 max-w-lg lg:max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
@@ -69,6 +81,39 @@ export function Komunitas({ stats, regencyStats, loading }) {
         <p className="text-sm text-brand-textSecondary leading-relaxed">
           Dampak kolektif seluruh warga Bali yang memilah sampah.
         </p>
+      </div>
+
+      {/* Penyaringan Waktu & Mitigasi Lonjakan Hari Raya */}
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-[#F9FBF9] border border-brand-light p-4 rounded-3xl animate-fade-slide">
+        {/* Time Scale Selector */}
+        <div className="flex items-center gap-1 bg-white p-1 rounded-2xl border border-brand-light w-full md:w-auto overflow-x-auto scrollbar-none shrink-0">
+          {[
+            { id: 'harian', label: 'Hari Ini' },
+            { id: 'mingguan', label: 'Minggu Ini' },
+            { id: 'bulanan', label: 'Bulan Ini' },
+            { id: 'total', label: 'Semua Kontribusi' }
+          ].map(range => (
+            <button
+              key={range.id}
+              onClick={() => setActiveRange(range.id)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer border-0 shrink-0 ${
+                activeRange === range.id
+                  ? 'bg-brand-primary text-white shadow-sm'
+                  : 'bg-transparent text-brand-textSecondary hover:bg-brand-light/30'
+              }`}
+            >
+              {range.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Ceremonial Waste Prediction Alert */}
+        <div className="bg-brand-orange/10 border border-brand-orange/20 rounded-2xl px-4 py-2.5 flex items-center gap-2.5 w-full md:max-w-md shrink-0">
+          <Calendar className="w-4 h-4 md:w-5 md:h-5 text-brand-orange shrink-0 stroke-[2.2px] animate-pulse-slow" />
+          <div className="text-[11px] md:text-xs text-brand-textSecondary leading-normal">
+            <span className="font-extrabold text-brand-orange">Mitigasi Upacara Adat</span>: Lonjakan sampah upakara diprediksi melimpah menjelang Hari Raya Galungan. Mohon mempersiapkan komposting bersama!
+          </div>
+        </div>
       </div>
 
       {/* Grid Komunitas */}
@@ -145,7 +190,7 @@ export function Komunitas({ stats, regencyStats, loading }) {
           <Card variant="dark" className="text-center">
             <TrendingUp className="w-6 h-6 text-brand-yellow mx-auto mb-2" />
             <p className="text-xs text-white/60 font-bold uppercase tracking-wider mb-1">Total Entri Log</p>
-            <p className="text-3xl font-extrabold text-white font-display">{stats.total_logs?.toLocaleString('id-ID')}</p>
+            <p className="text-3xl font-extrabold text-white font-display">{scaledStats.total_logs?.toLocaleString('id-ID')}</p>
             <p className="text-sm text-white/70 mt-2">
               catatan pemilahan dari seluruh warga Bali
             </p>

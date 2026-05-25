@@ -64,16 +64,16 @@ const WASTE_JOURNEY = [
   },
   {
     id: 'pln',
-    title: 'Jaringan PLN Bali',
-    subtitle: 'Listrik Bersih ke Rumah Warga',
+    title: 'Kesejahteraan & Energi Desa Adat',
+    subtitle: 'Siklus Timbal Balik Sosial',
     icon: Zap,
     color: '#f5a623',
     bg: '#FFF8E1',
-    detail: 'Listrik yang dihasilkan PSEL disalurkan ke jaringan PLN Bali, menerangi rumah-rumah warga. Siklus ini menutup lingkaran: sampah yang dipilah warga kembali menjadi energi untuk warga. Setiap 1 kg anorganik kering berpotensi menghasilkan ≈0.87 kWh listrik.',
+    detail: 'Listrik yang dihasilkan PSEL disalurkan kembali ke jaringan PLN Bali untuk menerangi fasilitas umum dan lampu jalan di pedesaan adat (Banjar) di Bali. Pemilahan sampah dari rumah Anda menutup siklus gotong royong: lingkungan Banjar bersih bebas pencemaran air lindi Subak, dan energi bersih kembali menyinari desa Anda.',
     tips: [
-      '1 kg plastik kering ≈ 10.8 jam lampu LED 8W',
-      'Listrik PSEL mengurangi ketergantungan Bali pada BBM impor',
-      'Setiap kWh PSEL menggantikan ≈0.7 kg CO₂ dari PLTD'
+      'Pemilahan di hulu menyelamatkan kelestarian Subak dan air bawah tanah Bali',
+      'Setiap 1 kg plastik kering memancarkan listrik untuk penerangan jalan umum Banjar',
+      'Gotong royong ini membuktikan kemandirian kelestarian lingkungan dan energi jagat Bali'
     ]
   }
 ];
@@ -154,7 +154,7 @@ export function AlurSampah() {
   const [openNode, setOpenNode] = useState('rumah');
 
   return (
-    <div className="px-5 pt-6 pb-36 md:pb-12 max-w-lg lg:max-w-6xl mx-auto space-y-6">
+    <div className="px-5 pt-12 pb-36 md:pt-20 md:pb-12 max-w-lg lg:max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">

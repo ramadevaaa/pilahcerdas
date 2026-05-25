@@ -1,0 +1,72 @@
+{
+  "Denpasar": {
+    "Denpasar Barat": ["Dauh Puri", "Dauh Puri Kauh", "Dauh Puri Kangin", "Dauh Puri Klod", "Pemecutan", "Pemecutan Klod", "Padangsambian", "Padangsambian Klod", "Padangsambian Kaja", "Tegal Harum", "Tegal Kerta"],
+    "Denpasar Timur": ["Dangin Puri", "Dangin Puri Kangin", "Dangin Puri Kauh", "Dangin Puri Klod", "Sumerta", "Sumerta Kaja", "Sumerta Kauh", "Sumerta Klod", "Kesiman", "Kesiman Kertalangu", "Kesiman Petilan", "Penatih", "Penatih Dangri"],
+    "Denpasar Selatan": ["Sanur", "Sanur Kaja", "Sanur Kauh", "Renon", "Panjer", "Pedungan", "Pemogan", "Sidakarya", "Serangan"],
+    "Denpasar Utara": ["Dauh Puri Kaja", "Peguyangan", "Peguyangan Kaja", "Peguyangan Kangin", "Tonja", "Ubung", "Ubung Kaja", "Pemecutan Kaja"]
+  },
+  "Badung": {
+    "Mengwi": ["Mengwi", "Cemagi", "Munggu", "Pererenan", "Seseh", "Buduk", "Tumbak Bayuh", "Mengwitani", "Kwerobokan", "Gulingan", "Baha", "Sobangan", "Penarungan"],
+    "Kuta Utara": ["Tibubeneng", "Canggu", "Kerobokan", "Kerobokan Kelod", "Kerobokan Kaja", "Dalung"],
+    "Kuta": ["Seminyak", "Legian", "Kuta", "Tuban", "Kedonganan"],
+    "Kuta Selatan": ["Jimbaran", "Benoa", "Tanjung Benoa", "Ungasan", "Pecatu", "Kutuh"],
+    "Abiansemal": ["Abiansemal", "Darmasaba", "Sibang Gede", "Sibang Kaja", "Mambal", "Sangeh", "Blahkiuh", "Selat"],
+    "Petang": ["Petang", "Pelaga", "Belok Sidan", "Carangsari"]
+  },
+  "Gianyar": {
+    "Gianyar": ["Gianyar", "Abianbase", "Beng", "Bitera", "Samplangan", "Sidan", "Temesi"],
+    "Ubud": ["Ubud", "Sayan", "Kedewatan", "Peliatan", "Mas", "Petulu", "Singakerta"],
+    "Sukawati": ["Sukawati", "Batubulan", "Batubulan Kangin", "Celuk", "Singapadu", "Singapadu Kaja", "Guwang", "Ketewel"],
+    "Blahbatuh": ["Blahbatuh", "Bedulu", "Belega", "Buruan", "Keramas", "Pering", "Saba"],
+    "Tampaksiring": ["Tampaksiring", "Manukaya", "Sanding", "Peken"],
+    "Tegalalang": ["Tegalalang", "Sebatu", "Keliki", "Pupuan"],
+    "Payangan": ["Payangan", "Buahan", "Melinggih", "Puhu"]
+  },
+  "Tabanan": {
+    "Tabanan": ["Tabanan", "Dajan Peken", "Delod Peken", "Denbantas", "Subamia", "Sudimara"],
+    "Kediri": ["Kediri", "Abiantuwung", "Beraban", "Nyitdah", "Pandak Gede", "Pandak Bandung", "Tanah Lot"],
+    "Marga": ["Marga", "Marga Dajan Puri", "Marga Delod Puri", "Payangan", "Kukuh"],
+    "Baturiti": ["Baturiti", "Candikuning", "Bedugul", "Luwus", "Perean"],
+    "Kerambitan": ["Kerambitan", "Kukuh", "Meliling", "Sembung Gede"],
+    "Selemadeg": ["Selemadeg", "Bajera", "Berembeng", "Manikyang"],
+    "Penebel": ["Penebel", "Jatiluwih", "Wongaya Gede", "Saba"],
+    "Pupuan": ["Pupuan", "Belimbing", "Pujungan", "Bantiran"]
+  },
+  "Buleleng": {
+    "Buleleng": ["Singaraja", "Banjar Bali", "Banjar Tegal", "Kampung Baru", "Penarukan", "Kalibukbuk", "Lovina"],
+    "Banjar": ["Banjar", "Dencarik", "Temukus", "Munduk", "Gobleg"],
+    "Sukasada": ["Sukasada", "Pancasari", "Wanagiri", "Gitgit", "Sambangan"],
+    "Seririt": ["Seririt", "Banjarasem", "Kalianget", "Ringdikit"],
+    "Gerokgak": ["Gerokgak", "Pemuteran", "Pejarakan", "Sanggalangit"],
+    "Kubutambahan": ["Kubutambahan", "Bontihing", "Bukti", "Tajun"],
+    "Sawan": ["Sawan", "Sangsit", "Sudaji", "Kerobokan"]
+  },
+  "Karangasem": {
+    "Karangasem": ["Amlapura", "Subagan", "Padangbai", "Bugbug", "Tumbu", "Seraya"],
+    "Abang": ["Abang", "Culik", "Purwakerthi", "Amed", "Tiyingtali"],
+    "Bebandem": ["Bebandem", "Sibetan", "Jungutan", "Macang"],
+    "Manggis": ["Manggis", "Candidasa", "Antiga", "Gelar"],
+    "Rendang": ["Rendang", "Besakih", "Menanga", "Pempatan"],
+    "Kubu": ["Kubu", "Tulamben", "Tianyar", "Dukuh"],
+    "Sidemen": ["Sidemen", "Lokasari", "Tri Eka Buana"]
+  },
+  "Klungkung": {
+    "Klungkung": ["Semarapura", "Semarapura Kaja", "Semarapura Tengah", "Gelgel", "Kamasan", "Tojan"],
+    "Nusa Penida": ["Nusa Penida", "Toyapakeh", "Jungutbatu", "Lembongan", "Ped", "Kutampi", "Suana"],
+    "Dawan": ["Dawan", "Kusamba", "Pesinggahan", "Gunaksa"],
+    "Banjarangkan": ["Banjarangkan", "Tohpati", "Tihingan", "Takmung"]
+  },
+  "Bangli": {
+    "Bangli": ["Bangli", "Cempaga", "Kawan", "Kubuh", "Taman Bali", "Landih"],
+    "Kintamani": ["Kintamani", "Batur", "Batur Utara", "Batur Selatan", "Toyabungkah", "Penelokan", "Songan"],
+    "Susut": ["Susut", "Sulahan", "Demulih", "Abuan"],
+    "Tembuku": ["Tembuku", "Peninjoan", "Yangapi", "Undisan"]
+  },
+  "Jembrana": {
+    "Negara": ["Negara", "Banjar Tengah", "Loloan Barat", "Kaliakah", "Baluk", "Cupel"],
+    "Mendoyo": ["Mendoyo", "Penyaringan", "Yehembang", "Delodrawah"],
+    "Melaya": ["Melaya", "Gilimanuk", "Candikusuma", "Ekadasa"],
+    "Pekutatan": ["Pekutatan", "Pulukan", "Medewi", "Gumbrih"],
+    "Jembrana": ["Jembrana", "Loloan Timur", "Batuagung", "Budeng"]
+  }
+}

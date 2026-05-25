@@ -52,29 +52,32 @@ export function useCommunity() {
 
       if (regionalError) throw regionalError;
 
-      // Update state jika data ada
-      if (globalData && globalData.total_kontributor > 0) {
-        // Gabungkan baseline data dengan data Supabase terbaru agar grafik tidak kosong di awal rilis
+      // Update state dengan data murni/riil dari database Supabase
+      if (globalData) {
         setStats({
-          total_kontributor: BASELINE_COMMUNITY_STATS.total_kontributor + Number(globalData.total_kontributor),
-          total_kg: parseFloat((BASELINE_COMMUNITY_STATS.total_kg + Number(globalData.total_kg)).toFixed(2)),
-          total_kwh: parseFloat((BASELINE_COMMUNITY_STATS.total_kwh + Number(globalData.total_kwh)).toFixed(2)),
-          total_co2e: parseFloat((BASELINE_COMMUNITY_STATS.total_co2e + Number(globalData.total_co2e)).toFixed(2)),
-          total_logs: BASELINE_COMMUNITY_STATS.total_logs + Number(globalData.total_logs)
+          total_kontributor: Number(globalData.total_kontributor || 0),
+          total_kg: parseFloat(Number(globalData.total_kg || 0).toFixed(2)),
+          total_kwh: parseFloat(Number(globalData.total_kwh || 0).toFixed(2)),
+          total_co2e: parseFloat(Number(globalData.total_co2e || 0).toFixed(2)),
+          total_logs: Number(globalData.total_logs || 0)
         });
       }
 
-      if (regionalData && regionalData.length > 0) {
-        const updatedRegencyStats = { ...BASELINE_REGENCY_STATS };
+      if (regionalData) {
+        const updatedRegencyStats = {};
+        // Inisialisasi data kabupaten bersih dari daftar regional
+        BALI_REGENCY_LIST.forEach(name => {
+          updatedRegencyStats[name] = { total_kg: 0, total_kwh: 0, total_co2e: 0, total_kontributor: 0 };
+        });
         
         regionalData.forEach(row => {
           const name = row.kabupaten;
           if (updatedRegencyStats[name]) {
             updatedRegencyStats[name] = {
-              total_kg: parseFloat((BASELINE_REGENCY_STATS[name].total_kg + Number(row.total_kg)).toFixed(2)),
-              total_kwh: parseFloat((BASELINE_REGENCY_STATS[name].total_kwh + Number(row.total_kwh)).toFixed(2)),
-              total_co2e: parseFloat((BASELINE_REGENCY_STATS[name].total_co2e + Number(row.total_co2e)).toFixed(2)),
-              total_kontributor: BASELINE_REGENCY_STATS[name].total_kontributor + Number(row.total_kontributor)
+              total_kg: parseFloat(Number(row.total_kg || 0).toFixed(2)),
+              total_kwh: parseFloat(Number(row.total_kwh || 0).toFixed(2)),
+              total_co2e: parseFloat(Number(row.total_co2e || 0).toFixed(2)),
+              total_kontributor: Number(row.total_kontributor || 0)
             };
           }
         });

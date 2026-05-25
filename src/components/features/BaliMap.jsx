@@ -3,7 +3,7 @@ import { MapPin, Users, Trash2, Zap, Leaf } from 'lucide-react';
 import { Card } from '../ui/Card';
 
 export function BaliMap({ regencyStats = {}, loading = false }) {
-  const [selectedRegency, setSelectedRegency] = useState('Badung');
+  const [selectedRegency, setSelectedRegency] = useState('');
 
   // Menentukan kabupaten dengan sampah tertinggi untuk menghitung rasio intensitas kontribusi
   const maxKg = Math.max(
@@ -87,12 +87,14 @@ export function BaliMap({ regencyStats = {}, loading = false }) {
     }
   ];
 
-  const selectedData = regencyStats[selectedRegency] || {
-    total_kg: 0,
-    total_kwh: 0,
-    total_co2e: 0,
-    total_kontributor: 0
-  };
+  const selectedData = selectedRegency 
+    ? (regencyStats[selectedRegency] || { total_kg: 0, total_kwh: 0, total_co2e: 0, total_kontributor: 0 })
+    : Object.values(regencyStats).reduce((acc, curr) => ({
+        total_kg: acc.total_kg + (curr.total_kg || 0),
+        total_kwh: acc.total_kwh + (curr.total_kwh || 0),
+        total_co2e: acc.total_co2e + (curr.total_co2e || 0),
+        total_kontributor: acc.total_kontributor + (curr.total_kontributor || 0)
+      }), { total_kg: 0, total_kwh: 0, total_co2e: 0, total_kontributor: 0 });
 
   return (
     <Card className="flex flex-col items-center">
@@ -218,14 +220,24 @@ export function BaliMap({ regencyStats = {}, loading = false }) {
 
       {/* Selected Regency Info Panel (Premium off-white card) */}
       <div className="w-full bg-[#F9FBF9] border border-brand-light rounded-2xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-bold text-brand-dark flex items-center">
-            <span className="w-2.5 h-2.5 bg-brand-yellow rounded-full mr-2 animate-ping" />
-            Kabupaten {selectedRegency}
-          </h3>
-          <span className="text-xs font-semibold text-brand-textSecondary">
-            {selectedData.total_kontributor} Warga Terlibat
-          </span>
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <div>
+            <h3 className="text-base font-bold text-brand-dark flex items-center gap-1.5">
+              <span className="w-2 h-2 bg-brand-yellow rounded-full animate-ping shrink-0" />
+              {selectedRegency ? `Kabupaten ${selectedRegency}` : 'Provinsi Bali (Agregat)'}
+            </h3>
+            <p className="text-[10px] text-brand-textSecondary font-bold mt-1 uppercase tracking-wider">
+              {selectedData.total_kontributor} Warga Terlibat
+            </p>
+          </div>
+          {selectedRegency && (
+            <button
+              onClick={() => setSelectedRegency('')}
+              className="px-3 py-1.5 bg-white hover:bg-brand-light text-brand-primary text-xs font-bold rounded-xl border border-brand-light/80 shadow-sm transition-all duration-200 active:scale-95 cursor-pointer shrink-0"
+            >
+              Lihat Keseluruhan
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-3 gap-4">

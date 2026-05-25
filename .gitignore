@@ -11,6 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.*
+
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +25,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Admin Dashboard Subfolder isolation
+/PilahCerdasDashboard/node_modules/
+/PilahCerdasDashboard/dist/
+/PilahCerdasDashboard/.env
+/PilahCerdasDashboard/.env.local
+/PilahCerdasDashboard/*.local
+# Temporary scratch files and docs
+scratch/
+*.docx
+PRD_*
+PRD_BARU
+

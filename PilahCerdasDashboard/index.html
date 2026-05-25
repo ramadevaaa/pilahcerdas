@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo-header.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a4a30" />
+
+  <!-- SEO Meta Tags -->
+  <title>PilahCerdas — Portal Dashboard DLH & TPS3R Bali</title>
+  <meta name="description" content="Dashboard monitoring dan analisis timbulan serta kualitas pemilahan sampah warga untuk Dinas Lingkungan Hidup dan Pengelola TPS3R se-Bali." />
+
+  <!-- Google Fonts: Outfit (Display), Inter (Body), & Nunito (Friendly fallback) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+
+<body class="bg-brand-bg text-brand-dark min-h-screen antialiased overflow-x-hidden">
+  <div id="root">
+    <!-- Premium Preloader / Splash Screen -->
+    <div style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-color: #f5faf7;
+      font-family: 'Outfit', sans-serif;
+    ">
+      <div style="
+        position: relative;
+        width: 120px;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #ffffff;
+        border: 1px solid #e8f5ee;
+        border-radius: 36px;
+        box-shadow: 0 20px 40px -15px rgba(26, 74, 48, 0.08);
+        animation: pulsePreloader 2s ease-in-out infinite;
+      ">
+        <img src="/logo.svg" alt="PilahCerdas Logo" style="
+          width: 84px;
+          height: 84px;
+          object-fit: contain;
+        " />
+      </div>
+      <h2 style="
+        margin-top: 24px;
+        font-size: 26px;
+        font-weight: 800;
+        color: #1a4a30;
+        letter-spacing: -0.5px;
+        margin-bottom: 0;
+      ">
+        Pilah<span style="color: #2d7a4f;">Cerdas</span>
+      </h2>
+      <p style="
+        margin-top: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        color: #687a70;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 0;
+      ">
+        Portal Admin DLH & TPS3R
+      </p>
+    </div>
+    <style>
+      @keyframes pulsePreloader {
+        0%, 100% {
+          transform: scale(1);
+          box-shadow: 0 20px 40px -15px rgba(26, 74, 48, 0.08);
+        }
+        50% {
+          transform: scale(1.05);
+          box-shadow: 0 25px 50px -12px rgba(45, 122, 79, 0.15);
+        }
+      }
+    </style>
+  </div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>

@@ -22,7 +22,16 @@ export function BottomNav({ activeTab, onChangeTab }) {
             return (
               <button
                 key={tab.id}
-                onClick={() => onChangeTab(tab.id)}
+                onClick={() => {
+                  if (activeTab === 'catat') {
+                    const confirmCancel = window.confirm("Apakah Anda yakin ingin membatalkan pemilahan sampah?");
+                    if (confirmCancel) {
+                      onChangeTab('home');
+                    }
+                  } else {
+                    onChangeTab(tab.id);
+                  }
+                }}
                 className="relative -top-6 flex items-center justify-center w-16 h-16 bg-brand-primary hover:bg-brand-primary/95 text-white rounded-full shadow-lg shadow-brand-primary/30 transition-all duration-200 active:scale-90 hover:scale-105 active:bg-brand-dark focus:outline-none focus:ring-4 focus:ring-brand-primary/20 border-0 cursor-pointer"
                 aria-label="Catat Sampah Baru"
               >

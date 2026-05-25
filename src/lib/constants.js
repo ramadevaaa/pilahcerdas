@@ -50,7 +50,7 @@ export const CALCULATOR_CONFIG = {
     lhvDry: 16.0                // ~16 MJ/kg (kertas/plastik)
   },
   residu: {
-    moisture: 0.40,             // Residu campuran (40% moisture)
+    moisture: 0.50,             // Residu campuran (50% moisture)
     lhvDry: 8.0                 // ~8 MJ/kg
   }
 };

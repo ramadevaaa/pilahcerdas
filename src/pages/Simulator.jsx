@@ -19,8 +19,9 @@ export function Simulator() {
 
     // Skenario TERPILAH: Anorganik murni kering
     const anorganikGram = totalGram * (rasioAnorganik / 100);
-    const organikGram = totalGram * ((100 - rasioAnorganik) / 100) * 0.7; // 70% organik
-    const residuGram = totalGram * ((100 - rasioAnorganik) / 100) * 0.3; // 30% residu
+    // Dikalibrasi agar saat anorganik = 30% (standar), organik tepat 60% dari total sampah (data KLH 2026)
+    const organikGram = totalGram * ((100 - rasioAnorganik) / 100) * 0.857; 
+    const residuGram = totalGram * ((100 - rasioAnorganik) / 100) * 0.143; 
 
     const calcAnorganik = getLogCalculations('anorganik', anorganikGram);
     const calcOrganik = getLogCalculations('organik', organikGram);
@@ -54,7 +55,7 @@ export function Simulator() {
   ];
 
   return (
-    <div className="px-5 pt-6 pb-36 md:pb-12 max-w-lg lg:max-w-6xl mx-auto space-y-6">
+    <div className="px-5 pt-12 pb-36 md:pt-20 md:pb-12 max-w-lg lg:max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
@@ -138,7 +139,7 @@ export function Simulator() {
           <Card>
             <h2 className="text-sm font-bold text-brand-dark mb-4 flex items-center gap-2">
               <Zap className="w-4 h-4 text-brand-yellow stroke-[2.5px]" />
-              Perbandingan Potensi Listrik (kWh)
+              Perbandingan Proyeksi Potensi Listrik 2027 (kWh)
             </h2>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
@@ -179,7 +180,7 @@ export function Simulator() {
           <div className="grid grid-cols-2 gap-3">
             <Card variant="green" padding="sm" className="text-center">
               <Flame className="w-5 h-5 text-brand-orange mx-auto mb-1.5" />
-              <p className="text-[10px] text-brand-textSecondary font-bold uppercase tracking-wider">Sampah Campur</p>
+              <p className="text-[10px] text-brand-textSecondary font-bold uppercase tracking-wider">Sampah Campur (Proyeksi 2027)</p>
               <p className="text-xl font-extrabold text-brand-orange font-display mt-1">
                 {results.campurKwh.toFixed(3)}
               </p>
@@ -188,7 +189,7 @@ export function Simulator() {
 
             <Card variant="green" padding="sm" className="text-center">
               <Zap className="w-5 h-5 text-brand-primary mx-auto mb-1.5" />
-              <p className="text-[10px] text-brand-textSecondary font-bold uppercase tracking-wider">Sampah Terpilah</p>
+              <p className="text-[10px] text-brand-textSecondary font-bold uppercase tracking-wider">Sampah Terpilah (Proyeksi 2027)</p>
               <p className="text-xl font-extrabold text-brand-primary font-display mt-1">
                 {results.terpilahKwh.toFixed(3)}
               </p>
@@ -199,7 +200,7 @@ export function Simulator() {
           {/* Peningkatan Card */}
           <Card variant="dark" className="text-center">
             <p className="text-xs text-white/60 font-bold uppercase tracking-wider mb-1">
-              Peningkatan Efisiensi
+              Peningkatan Efisiensi (Proyeksi 2027)
             </p>
             <p className="text-4xl font-extrabold text-brand-yellow font-display">
               +{results.peningkatan}%
@@ -224,6 +225,40 @@ export function Simulator() {
               </div>
             </Card>
           )}
+
+          {/* Skenario Visual Timbal Balik Bali */}
+          <Card className="space-y-4">
+            <h3 className="text-sm font-bold text-brand-dark flex items-center gap-2">
+              <TreePine className="w-4 h-4 text-brand-primary stroke-[2.5px]" />
+              Dampak Nyata Terhadap Masa Depan Bali
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Skenario Buruk */}
+              <div className="bg-brand-orange/5 border border-brand-orange/10 rounded-2xl p-4 space-y-2">
+                <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-orange/20 text-brand-orange uppercase">
+                  Sampah Dicampur (Buruk)
+                </span>
+                <ul className="text-xs text-brand-textSecondary space-y-1.5 list-disc pl-4">
+                  <li><strong>Kebakaran TPA</strong>: Tumpukan sampah basah & plastik menghasilkan gas metana eksplosif (seperti musibah TPA Suwung).</li>
+                  <li><strong>Racun Subak</strong>: Air lindi (*leachate*) merembes mencemari sistem irigasi Subak Bali.</li>
+                  <li><strong>Polusi Udara</strong>: Asap pembakaran sampah liar di desa adat merusak pernapasan anak-anak.</li>
+                </ul>
+              </div>
+
+              {/* Skenario Baik */}
+              <div className="bg-brand-light/60 border border-brand-primary/10 rounded-2xl p-4 space-y-2">
+                <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-primary/20 text-brand-primary uppercase">
+                  Sampah Dipilah (Baik)
+                </span>
+                <ul className="text-xs text-brand-textSecondary space-y-1.5 list-disc pl-4">
+                  <li><strong>Dapur Mandiri</strong>: Organik terolah menjadi kompos subur & Eco-Enzyme harum di pekarangan.</li>
+                  <li><strong>Banjar Bercahaya</strong>: Residu bernilai kalori tinggi diproses PSEL menjadi listrik jalan desa.</li>
+                  <li><strong>Pariwisata Lestari</strong>: Alam Bali tetap bersih, hijau, dan harum bagi generasi penerus.</li>
+                </ul>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     </div>
