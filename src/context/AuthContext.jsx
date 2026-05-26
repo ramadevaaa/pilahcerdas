@@ -4,9 +4,25 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [isGuest, setIsGuest] = useState(false);
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('pilah_user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [profile, setProfile] = useState(() => {
+    try {
+      const savedProfile = localStorage.getItem('pilah_user_profile');
+      return savedProfile ? JSON.parse(savedProfile) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [isGuest, setIsGuest] = useState(() => {
+    return localStorage.getItem('pilah_is_guest') === 'true';
+  });
   const [loading, setLoading] = useState(true);
 
   // Helper untuk emulasi email di balik layar menggunakan domain gmail.com agar lolos sensor MX Record Supabase
@@ -65,23 +81,39 @@ export function AuthProvider({ children }) {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
+          if (isMounted) {
+            setUser(session.user);
+            localStorage.setItem('pilah_user', JSON.stringify(session.user));
+          }
           const userProfile = await fetchProfile(session.user.id);
           
           if (userProfile) {
             if (isMounted) {
-              setUser(session.user);
               setProfile(userProfile);
               setIsGuest(false);
+              localStorage.setItem('pilah_user_profile', JSON.stringify(userProfile));
+              localStorage.setItem('pilah_is_guest', 'false');
             }
           } else {
-            // JIKA SESI ADA TAPI PROFIL KOSONG (Efek database di-reset / Fresh Start):
-            // Lakukan sign out paksa di latar belakang agar token usang di localStorage langsung bersih!
-            console.warn('⚠️ Sesi lama ditemukan tetapi data profil kosong di server. Melakukan pembersihan token...');
-            await supabase.auth.signOut();
-            if (isMounted) {
-              setUser(null);
-              setProfile(null);
+            // Cek apakah ada profil di cache lokal
+            const cachedProfile = localStorage.getItem('pilah_user_profile');
+            if (!cachedProfile) {
+              console.warn('⚠️ Sesi lama ditemukan tetapi data profil kosong di server. Melakukan pembersihan token...');
+              await supabase.auth.signOut();
+              if (isMounted) {
+                setUser(null);
+                setProfile(null);
+                localStorage.removeItem('pilah_user');
+                localStorage.removeItem('pilah_user_profile');
+              }
             }
+          }
+        } else {
+          if (isMounted) {
+            setUser(null);
+            setProfile(null);
+            localStorage.removeItem('pilah_user');
+            localStorage.removeItem('pilah_user_profile');
           }
         }
       } catch (e) {
@@ -100,19 +132,21 @@ export function AuthProvider({ children }) {
       if (!isMounted) return;
 
       if (session?.user) {
+        setUser(session.user);
+        localStorage.setItem('pilah_user', JSON.stringify(session.user));
+        
         const userProfile = await fetchProfile(session.user.id);
         if (userProfile) {
-          setUser(session.user);
           setProfile(userProfile);
           setIsGuest(false);
-        } else {
-          // Token tidak memiliki profil valid di DB (mungkin terhapus di backend)
-          setUser(null);
-          setProfile(null);
+          localStorage.setItem('pilah_user_profile', JSON.stringify(userProfile));
+          localStorage.setItem('pilah_is_guest', 'false');
         }
       } else {
         setUser(null);
         setProfile(null);
+        localStorage.removeItem('pilah_user');
+        localStorage.removeItem('pilah_user_profile');
       }
     });
 
@@ -168,6 +202,9 @@ export function AuthProvider({ children }) {
     setUser(null);
     setProfile(null);
     setIsGuest(false);
+    localStorage.removeItem('pilah_user');
+    localStorage.removeItem('pilah_user_profile');
+    localStorage.removeItem('pilah_is_guest');
 
     return data;
   };
@@ -193,6 +230,9 @@ export function AuthProvider({ children }) {
         setUser(data.user);
         setProfile(userProfile);
         setIsGuest(false);
+        localStorage.setItem('pilah_user', JSON.stringify(data.user));
+        localStorage.setItem('pilah_user_profile', JSON.stringify(userProfile));
+        localStorage.setItem('pilah_is_guest', 'false');
       } else {
         // Jika user ada di Auth tapi profil tidak ada di DB, signOut paksa agar bersih
         await supabase.auth.signOut();
@@ -208,6 +248,9 @@ export function AuthProvider({ children }) {
     setIsGuest(true);
     setUser(null);
     setProfile(null);
+    localStorage.setItem('pilah_is_guest', 'true');
+    localStorage.removeItem('pilah_user');
+    localStorage.removeItem('pilah_user_profile');
   };
 
   // Fungsi Keluar / Logout
@@ -215,6 +258,9 @@ export function AuthProvider({ children }) {
     setIsGuest(false);
     setUser(null);
     setProfile(null);
+    localStorage.removeItem('pilah_is_guest');
+    localStorage.removeItem('pilah_user');
+    localStorage.removeItem('pilah_user_profile');
     if (isSupabaseConfigured && supabase) {
       await supabase.auth.signOut();
     }

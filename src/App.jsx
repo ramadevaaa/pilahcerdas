@@ -55,8 +55,9 @@ function AppContent() {
     return <Login onNavigateToRegister={() => setAuthScreen('register')} />;
   }
 
-  // 3. Onboarding Screen (hanya untuk warga terdaftar baru atau tamu yang belum onboard)
-  if (!onboarded) {
+  // 3. Onboarding Screen (hanya untuk tamu/guest yang belum onboard)
+  // Warga terdaftar (profile !== null) langsung dilewatkan karena kabupaten sudah tercatat di database profil.
+  if (!onboarded && !profile) {
     return (
       <Onboarding
         onComplete={handleOnboardingComplete}
