@@ -23,7 +23,21 @@ export function AuthProvider({ children }) {
   const [isGuest, setIsGuest] = useState(() => {
     return localStorage.getItem('pilah_is_guest') === 'true';
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('pilah_user');
+      const savedProfile = localStorage.getItem('pilah_user_profile');
+      const isGuest = localStorage.getItem('pilah_is_guest') === 'true';
+      
+      // Jika ada data sesi dan profil warga di cache, atau masuk sebagai tamu, bypass loading screen!
+      if ((savedUser && savedProfile) || isGuest) {
+        return false;
+      }
+      return true; // Jika benar-benar kosong, tampilkan loading screen untuk check sesi awal
+    } catch {
+      return true;
+    }
+  });
 
   // Helper untuk emulasi email di balik layar menggunakan domain gmail.com agar lolos sensor MX Record Supabase
   const formatEmail = (phone) => {
@@ -68,7 +82,7 @@ export function AuthProvider({ children }) {
     return null;
   };
 
-  // Cek sesi aktif saat pertama kali aplikasi dimuat & bersihkan sesi usang
+  // Sinkronisasi sesi aktif saat pertama kali aplikasi dimuat & dengarkan perubahan secara real-time
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) {
       setLoading(false);
@@ -77,28 +91,26 @@ export function AuthProvider({ children }) {
 
     let isMounted = true;
 
-    const checkSessionAndCleanObsolete = async () => {
+    // Dengarkan perubahan status auth secara real-time (Supabase otomatis memicu callback ini saat inisialisasi)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
+
       try {
-        const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          if (isMounted) {
-            setUser(session.user);
-            localStorage.setItem('pilah_user', JSON.stringify(session.user));
-          }
-          const userProfile = await fetchProfile(session.user.id);
+          setUser(session.user);
+          localStorage.setItem('pilah_user', JSON.stringify(session.user));
           
+          const userProfile = await fetchProfile(session.user.id);
           if (userProfile) {
-            if (isMounted) {
-              setProfile(userProfile);
-              setIsGuest(false);
-              localStorage.setItem('pilah_user_profile', JSON.stringify(userProfile));
-              localStorage.setItem('pilah_is_guest', 'false');
-            }
+            setProfile(userProfile);
+            setIsGuest(false);
+            localStorage.setItem('pilah_user_profile', JSON.stringify(userProfile));
+            localStorage.setItem('pilah_is_guest', 'false');
           } else {
-            // Cek apakah ada profil di cache lokal
+            // Sesi aktif tetapi profil warga tidak ditemukan di DB (misal terhapus), bersihkan sesi
             const cachedProfile = localStorage.getItem('pilah_user_profile');
             if (!cachedProfile) {
-              console.warn('⚠️ Sesi lama ditemukan tetapi data profil kosong di server. Melakukan pembersihan token...');
+              console.warn('⚠️ Sesi aktif terdeteksi tetapi profil warga kosong di server. Melakukan signout...');
               await supabase.auth.signOut();
               if (isMounted) {
                 setUser(null);
@@ -109,6 +121,7 @@ export function AuthProvider({ children }) {
             }
           }
         } else {
+          // Jika sesi tidak ditemukan, pastikan cache lokal warga dibersihkan (kecuali mode tamu)
           if (isMounted) {
             setUser(null);
             setProfile(null);
@@ -116,37 +129,12 @@ export function AuthProvider({ children }) {
             localStorage.removeItem('pilah_user_profile');
           }
         }
-      } catch (e) {
-        console.error('Error saat verifikasi sesi lama:', e);
+      } catch (err) {
+        console.error('Error saat sinkronisasi status autentikasi:', err);
       } finally {
         if (isMounted) {
           setLoading(false);
         }
-      }
-    };
-
-    checkSessionAndCleanObsolete();
-
-    // Dengarkan perubahan status auth secara real-time
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!isMounted) return;
-
-      if (session?.user) {
-        setUser(session.user);
-        localStorage.setItem('pilah_user', JSON.stringify(session.user));
-        
-        const userProfile = await fetchProfile(session.user.id);
-        if (userProfile) {
-          setProfile(userProfile);
-          setIsGuest(false);
-          localStorage.setItem('pilah_user_profile', JSON.stringify(userProfile));
-          localStorage.setItem('pilah_is_guest', 'false');
-        }
-      } else {
-        setUser(null);
-        setProfile(null);
-        localStorage.removeItem('pilah_user');
-        localStorage.removeItem('pilah_user_profile');
       }
     });
 
