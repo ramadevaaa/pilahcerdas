@@ -24,9 +24,29 @@ const BASELINE_REGENCY_STATS = {
   'Jembrana': { total_kg: 20.00, total_kwh: 0, total_co2e: 6.00, total_kontributor: 2 }
 };
 
+const CACHE_COMMUNITY_STATS = 'pilah_cached_community_stats';
+const CACHE_REGENCY_STATS = 'pilah_cached_regency_stats';
+
 export function useCommunity() {
-  const [stats, setStats] = useState(BASELINE_COMMUNITY_STATS);
-  const [regencyStats, setRegencyStats] = useState(BASELINE_REGENCY_STATS);
+  // Inisialisasi dari cache lokal jika ada, jika tidak, gunakan baseline data dummy
+  const [stats, setStats] = useState(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_COMMUNITY_STATS);
+      return cached ? JSON.parse(cached) : BASELINE_COMMUNITY_STATS;
+    } catch {
+      return BASELINE_COMMUNITY_STATS;
+    }
+  });
+
+  const [regencyStats, setRegencyStats] = useState(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_REGENCY_STATS);
+      return cached ? JSON.parse(cached) : BASELINE_REGENCY_STATS;
+    } catch {
+      return BASELINE_REGENCY_STATS;
+    }
+  });
+
   const [loading, setLoading] = useState(true);
 
   // Ambil data statistik dari Supabase
@@ -52,15 +72,17 @@ export function useCommunity() {
 
       if (regionalError) throw regionalError;
 
-      // Update state dengan data murni/riil dari database Supabase
+      // Update state dengan data murni/riil dari database Supabase & simpan ke cache
       if (globalData) {
-        setStats({
+        const parsedGlobal = {
           total_kontributor: Number(globalData.total_kontributor || 0),
           total_kg: parseFloat(Number(globalData.total_kg || 0).toFixed(2)),
           total_kwh: parseFloat(Number(globalData.total_kwh || 0).toFixed(2)),
           total_co2e: parseFloat(Number(globalData.total_co2e || 0).toFixed(2)),
           total_logs: Number(globalData.total_logs || 0)
-        });
+        };
+        setStats(parsedGlobal);
+        localStorage.setItem(CACHE_COMMUNITY_STATS, JSON.stringify(parsedGlobal));
       }
 
       if (regionalData) {
@@ -83,9 +105,11 @@ export function useCommunity() {
         });
 
         setRegencyStats(updatedRegencyStats);
+        localStorage.setItem(CACHE_REGENCY_STATS, JSON.stringify(updatedRegencyStats));
       }
     } catch (e) {
-      console.warn('Mode Offline: Menggunakan baseline data komunitas.', e);
+      console.warn('Mode Offline: Menggunakan data komunitas terakhir yang tersimpan di cache.', e);
+      // Sederhana: Biarkan state stats & regencyStats memakai nilai yang saat ini ada di cache lokal, jangan di-reset ke baseline!
     } finally {
       setLoading(false);
     }

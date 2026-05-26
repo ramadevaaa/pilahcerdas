@@ -105,7 +105,7 @@ export function useLog() {
     }
   }, [user, profile, fetchLogs, syncing]);
 
-  // Menambah log pemilahan baru
+  // Menambah log pemilahan baru secara instan (Offline-First / Cache-First)
   const addLog = async (kategori, beratGram, metodeInput = 'manual', subkategori = []) => {
     // Tentukan wilayah penginputan dari data profil warga terdaftar
     const activeRegency = profile ? profile.kabupaten : regency;
@@ -132,45 +132,43 @@ export function useLog() {
       created_at: new Date().toISOString()
     };
 
-    // 1. Simpan di Local Cache untuk kemudahan UX instan
-    const localCache = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
-    
-    if (isSupabaseConfigured && supabase && user && profile) {
-      try {
-        const uploadItem = { 
-          ...newLog, 
-          user_id: user.id
-        };
-        
-        const { data, error } = await supabase
-          .from('pilah_logs')
-          .insert([uploadItem])
-          .select();
-
-        if (error) throw error;
-
-        if (data && data[0]) {
-          // Sukses online: simpan di cache riwayat
-          const updatedCache = [data[0], ...localCache].slice(0, 30);
-          localStorage.setItem(CACHE_KEY, JSON.stringify(updatedCache));
-          await fetchLogs();
-          return data[0];
-        }
-      } catch (e) {
-        console.warn('Gagal menyimpan online. Menyimpan ke antrean sinkronisasi offline...', e);
-      }
-    }
-
-    // 2. Fallback Offline: Simpan ke Sync Queue
+    // Buat temporary ID unik lokal untuk log baru ini
     const tempId = `temp_${Date.now()}`;
-    const offlineLog = { ...newLog, id: tempId, isOffline: true };
+    const offlineLog = { 
+      ...newLog, 
+      id: tempId, 
+      isOffline: true 
+    };
+
+    // 1. SIMPAN SEGERA KE LOCAL STORAGE (Cache & Antrean Sinkronisasi)
+    // Simpan ke Cache Riwayat (localStorage)
+    const localCache = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
+    const updatedCache = [offlineLog, ...localCache].slice(0, 30);
+    localStorage.setItem(CACHE_KEY, JSON.stringify(updatedCache));
+
+    // Simpan ke Antrean Sinkronisasi Offline
     const queue = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
-    
     queue.push(offlineLog);
     localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
-    
-    // Update state logs secara instan agar UI memperlihatkan log offline
+
+    // 2. PERBARUI STATE REACT INSTAN (UX Terbuka Seketika)
     setLogs((prev) => [offlineLog, ...prev]);
+
+    // 3. JALANKAN SINKRONISASI LATAR BELAKANG (ASINKRON / FIRE-AND-FORGET)
+    // Kueri Supabase dilempar ke latar belakang tanpa memakai 'await' agar form penginputan tidak ikut 'hang'!
+    if (isSupabaseConfigured && supabase && user && profile) {
+      console.log('[useLog Debug] Memicu sinkronisasi antrean ke database di latar belakang...');
+      setTimeout(() => {
+        syncQueue().catch(err => {
+          console.warn('[useLog Debug] Gagal melakukan sinkronisasi otomatis di latar belakang:', err);
+        });
+      }, 0);
+    } else {
+      console.log('[useLog Debug] Berjalan dalam mode offline. Log disimpan aman di antrean lokal.');
+    }
+
+    // 4. KEMBALIKAN LOG INSTAN
+    // Aksi input selesai seketika di sisi pengguna, tidak ada loading lama!
     return offlineLog;
   };
 
@@ -221,23 +219,27 @@ export function useLog() {
     }
   }, [user, fetchLogs]);
 
+  // Detektor koneksi internet: jalankan sinkronisasi otomatis ketika kembali online
   useEffect(() => {
     if (!user || !profile) return;
 
     const handleOnline = () => {
+      console.log('[useLog Debug] Koneksi terdeteksi kembali ONLINE. Menjalankan sinkronisasi antrean...');
       syncQueue();
     };
 
     window.addEventListener('online', handleOnline);
-    // Jalankan sync queue saat pertama kali load jika online
+    
+    // Jalankan sync queue saat pertama kali warga masuk jika terdeteksi online
     if (navigator.onLine) {
+      console.log('[useLog Debug] Warga masuk dalam status online. Sinkronisasi antrean...');
       syncQueue();
     }
 
     return () => {
       window.removeEventListener('online', handleOnline);
     };
-  }, [user, profile, syncQueue]);
+  }, [user, profile]); // Hapus 'syncQueue' dari dependensi untuk mencegah infinite loop ketika state 'syncing' berubah!
 
   return {
     logs,
