@@ -47,17 +47,23 @@ export function AuthProvider({ children }) {
 
   // Membaca data profil dari database Supabase (dengan proteksi propagasi JWT dan retry)
   const fetchProfile = async (userId) => {
-    if (!isSupabaseConfigured || !supabase) return null;
+    if (!isSupabaseConfigured || !supabase) {
+      console.warn("[AuthContext Debug] Supabase belum terkonfigurasi untuk fetchProfile.");
+      return null;
+    }
     
+    console.log(`[AuthContext Debug] 🔍 fetchProfile() dipanggil untuk User ID: ${userId}`);
     let retries = 3;
     let delay = 100;
     let lastError = null;
 
     while (retries > 0) {
+      const attemptNum = 4 - retries;
       try {
-        // Jeda mikro agar Supabase JS sempat menempelkan token JWT ke header kueri
+        console.log(`[AuthContext Debug]   - Percobaan #${attemptNum}: Menunggu jeda ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
         
+        console.log(`[AuthContext Debug]   - Percobaan #${attemptNum}: Mengirim kueri SELECT ke tabel 'profiles'...`);
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
@@ -69,22 +75,34 @@ export function AuthProvider({ children }) {
           throw error;
         }
         
+        console.log(`[AuthContext Debug]   - Percobaan #${attemptNum}: ✅ BERHASIL memuat data profil:`, data);
         return data; // Berhasil mengambil data profil
       } catch (e) {
         lastError = e;
-        console.warn(`[fetchProfile] Gagal mengambil profil untuk user ${userId} (Percobaan sisa: ${retries - 1}). Error:`, e);
+        console.error(`[AuthContext Debug]   - Percobaan #${attemptNum}: ❌ Gagal mengambil profil. Error detail:`, {
+          message: e.message,
+          code: e.code,
+          hint: e.hint,
+          details: e.details
+        });
         retries--;
         delay += 250; // Tingkatkan jeda waktu untuk percobaan berikutnya
       }
     }
     
-    console.error(`[fetchProfile] Kritis: Gagal memuat profil setelah 3x percobaan. Error terakhir:`, lastError);
+    console.error(`[AuthContext Debug] 🚨 Kritis: Gagal memuat profil setelah 3x percobaan. Error terakhir:`, lastError);
     return null;
   };
 
   // Sinkronisasi sesi aktif saat pertama kali aplikasi dimuat & dengarkan perubahan secara real-time
   useEffect(() => {
+    console.log("[AuthContext Debug] 🏁 useEffect di-mount. Status konfigurasi Supabase:", {
+      isSupabaseConfigured,
+      hasSupabaseClient: !!supabase
+    });
+
     if (!isSupabaseConfigured || !supabase) {
+      console.warn("[AuthContext Debug] Supabase belum terkonfigurasi. Mematikan loading.");
       setLoading(false);
       return;
     }
@@ -92,36 +110,36 @@ export function AuthProvider({ children }) {
     let isMounted = true;
 
     // Dengarkan perubahan status auth secara real-time (Supabase otomatis memicu callback ini saat inisialisasi)
+    console.log("[AuthContext Debug] 📡 Mendaftarkan listener onAuthStateChange...");
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!isMounted) return;
 
+      console.log(`[AuthContext Debug] ⚡ Event Auth Terpicu: '${event}'`, {
+        sessionExists: !!session,
+        userId: session?.user?.id,
+        userEmail: session?.user?.email
+      });
+
       try {
         if (session?.user) {
-          setUser(session.user);
-          localStorage.setItem('pilah_user', JSON.stringify(session.user));
-          
+          console.log("[AuthContext Debug] Sesi aktif terdeteksi. Memanggil fetchProfile() sebelum memperbarui state...");
           const userProfile = await fetchProfile(session.user.id);
+          
           if (userProfile) {
+            console.log("[AuthContext Debug] Profil valid diperoleh! Memperbarui state user & profile secara bersamaan...");
+            setUser(session.user);
             setProfile(userProfile);
             setIsGuest(false);
+            localStorage.setItem('pilah_user', JSON.stringify(session.user));
             localStorage.setItem('pilah_user_profile', JSON.stringify(userProfile));
             localStorage.setItem('pilah_is_guest', 'false');
           } else {
-            // Sesi aktif tetapi profil warga tidak ditemukan di DB (misal terhapus), bersihkan sesi
-            const cachedProfile = localStorage.getItem('pilah_user_profile');
-            if (!cachedProfile) {
-              console.warn('⚠️ Sesi aktif terdeteksi tetapi profil warga kosong di server. Melakukan signout...');
-              await supabase.auth.signOut();
-              if (isMounted) {
-                setUser(null);
-                setProfile(null);
-                localStorage.removeItem('pilah_user');
-                localStorage.removeItem('pilah_user_profile');
-              }
-            }
+            console.warn("[AuthContext Debug] ⚠️ Sesi aktif terdeteksi tetapi fetchProfile() mengembalikan NULL. Kemungkinan dalam alur pendaftaran baru.");
+            // PENTING: Jangan lakukan signOut paksa di sini agar kueri insert profil di signUpWarga tidak terganggu!
+            // Jangan perbarui user/profile state agar layar Register/Login tidak ter-unmount secara prematur.
           }
         } else {
-          // Jika sesi tidak ditemukan, pastikan cache lokal warga dibersihkan (kecuali mode tamu)
+          console.log("[AuthContext Debug] Tidak ada sesi aktif (atau User Sign Out). Membersihkan state...");
           if (isMounted) {
             setUser(null);
             setProfile(null);
@@ -130,15 +148,17 @@ export function AuthProvider({ children }) {
           }
         }
       } catch (err) {
-        console.error('Error saat sinkronisasi status autentikasi:', err);
+        console.error('[AuthContext Debug] ❌ Terjadi error saat memproses status autentikasi:', err);
       } finally {
         if (isMounted) {
+          console.log("[AuthContext Debug] 🏁 Akhir onAuthStateChange. Mengatur loading = false.");
           setLoading(false);
         }
       }
     });
 
     return () => {
+      console.log("[AuthContext Debug] 🛑 useEffect di-unmount. Unsubscribe auth listener.");
       isMounted = false;
       subscription.unsubscribe();
     };
