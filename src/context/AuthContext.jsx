@@ -263,14 +263,22 @@ export function AuthProvider({ children }) {
 
   // Fungsi Keluar / Logout
   const logout = async () => {
-    setIsGuest(false);
-    setUser(null);
-    setProfile(null);
-    localStorage.removeItem('pilah_is_guest');
-    localStorage.removeItem('pilah_user');
-    localStorage.removeItem('pilah_user_profile');
-    if (isSupabaseConfigured && supabase) {
-      await supabase.auth.signOut();
+    try {
+      // Tunggu Supabase signOut selesai TERLEBIH DAHULU
+      // agar tidak ada auth state mismatch (sesi server masih hidup tapi state lokal sudah bersih)
+      if (isSupabaseConfigured && supabase) {
+        await supabase.auth.signOut();
+      }
+    } catch (err) {
+      console.error('[AuthContext] Error saat signOut Supabase:', err);
+    } finally {
+      // Selalu bersihkan state lokal, meski signOut gagal
+      setIsGuest(false);
+      setUser(null);
+      setProfile(null);
+      localStorage.removeItem('pilah_is_guest');
+      localStorage.removeItem('pilah_user');
+      localStorage.removeItem('pilah_user_profile');
     }
   };
 

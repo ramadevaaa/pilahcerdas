@@ -196,8 +196,26 @@ export function IncidentCenter() {
   const clusteredIncidents = useMemo(() => {
     const groups = [];
     filteredIncidents.forEach(inc => {
+      // Guard: jika koordinat GPS tidak valid (null/undefined), buat grup sendiri
+      if (!inc.latitude || !inc.longitude) {
+        groups.push({
+          id: inc.id,
+          latitude: null,
+          longitude: null,
+          kategori: inc.kategori,
+          status: inc.status,
+          kabupaten: inc.kabupaten,
+          kecamatan: inc.kecamatan,
+          desa: inc.desa,
+          banjar: inc.banjar,
+          items: [inc]
+        });
+        return;
+      }
+
       let foundGroup = false;
       for (const g of groups) {
+        if (!g.latitude || !g.longitude) continue; // Lewati grup tanpa koordinat
         const dist = getDistanceMeters(inc.latitude, inc.longitude, g.latitude, g.longitude);
         // Gabungkan jika kategori, status sama, dan jarak < 30 meter
         if (dist < 30 && inc.kategori === g.kategori && inc.status === g.status) {

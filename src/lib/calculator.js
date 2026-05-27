@@ -51,6 +51,13 @@ export function getLogCalculations(kategori, beratGram) {
   const weightKg = beratGram / 1000;
   const config = CALCULATOR_CONFIG[kategori];
   
+  // Guard: jika kategori tidak dikenal (typo, kategori baru, data korup dari DB),
+  // kembalikan nilai nol daripada crash dengan TypeError
+  if (!config) {
+    console.warn(`[calculator] Kategori tidak dikenal: '${kategori}'. Menggunakan nilai nol.`);
+    return { lhv: 0, kwh: 0, co2e: 0, analogi: null };
+  }
+  
   // 1. Hitung LHV
   const lhv = calculateLHV(config.lhvDry, config.moisture);
   

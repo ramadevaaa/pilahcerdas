@@ -94,6 +94,7 @@ export function useLog() {
           kategori: item.kategori,
           metode_input: item.metode_input,
           berat_gram: item.berat_gram,
+          subkategori: item.subkategori || [],  // WARN-02 fix: jangan sampai subkategori hilang saat sync
           lhv_mj: item.lhv_mj,
           kwh_potensi: item.kwh_potensi,
           co2e_saved: item.co2e_saved,
@@ -247,11 +248,9 @@ export function useLog() {
     syncQueueRef.current = syncQueue;
   }, [syncQueue]);
 
-  // Guard agar sinkronisasi saat mount hanya terjadi SEKALI per session login
-  const hasSyncedOnMount = useRef(false);
-
   // Detektor koneksi internet: jalankan sinkronisasi otomatis ketika kembali online
   useEffect(() => {
+    // Tunggu sampai user DAN profile keduanya sudah termuat sebelum apapun berjalan
     if (!user || !profile) return;
 
     const handleOnline = () => {
@@ -261,17 +260,21 @@ export function useLog() {
 
     window.addEventListener('online', handleOnline);
     
-    // Jalankan sinkronisasi HANYA SEKALI saat mount/refresh — bukan setiap profile berubah
-    if (navigator.onLine && !hasSyncedOnMount.current) {
-      hasSyncedOnMount.current = true;
-      console.log('[useLog] Mount online pertama kali. Menyinkronkan antrean...');
+    // Sinkronisasi saat mount — aman karena:
+    // - syncQueue memiliki guard sendiri (syncingRef + queue.length === 0)
+    // - Effect ini hanya berjalan saat user & profile sudah valid (tidak null)
+    if (navigator.onLine) {
+      console.log('[useLog] User & profil siap, status online. Menyinkronkan antrean...');
       syncQueueRef.current();
     }
 
     return () => {
       window.removeEventListener('online', handleOnline);
     };
-  }, [user, profile]);
+  // Gunakan ID primitif (string) bukan object — object reference selalu baru setiap render
+  // sehingga effect tidak re-run berulang saat profile object berubah referensi
+  }, [user?.id, profile?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   return {
     logs,
