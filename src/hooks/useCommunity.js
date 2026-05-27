@@ -4,7 +4,7 @@ import { BALI_REGENCY_LIST } from '../lib/constants';
 
 // Data komunitas awal untuk disajikan sebagai baseline (dan fallback offline)
 const BASELINE_COMMUNITY_STATS = {
-  total_kontributor: 147,
+  total_kontributor: 513,
   total_kg: 4125.80,
   total_kwh: 712.45,
   total_co2e: 1890.30,
@@ -13,15 +13,15 @@ const BASELINE_COMMUNITY_STATS = {
 
 // Data kontribusi awal per kabupaten di Bali agar peta bercahaya secara realistik dari hari pertama
 const BASELINE_REGENCY_STATS = {
-  'Badung': { total_kg: 1450.50, total_kwh: 310.20, total_co2e: 520.10, total_kontributor: 48 },
-  'Denpasar': { total_kg: 1120.30, total_kwh: 245.80, total_co2e: 410.50, total_kontributor: 42 },
-  'Gianyar': { total_kg: 680.40, total_kwh: 112.50, total_co2e: 320.40, total_kontributor: 22 },
-  'Tabanan': { total_kg: 450.20, total_kwh: 32.40, total_co2e: 280.60, total_kontributor: 15 },
-  'Klungkung': { total_kg: 180.60, total_kwh: 9.80, total_co2e: 140.20, total_kontributor: 8 },
-  'Bangli': { total_kg: 95.30, total_kwh: 0, total_co2e: 106.70, total_kontributor: 4 },
-  'Karangasem': { total_kg: 72.00, total_kwh: 0, total_co2e: 80.60, total_kontributor: 3 },
-  'Buleleng': { total_kg: 56.50, total_kwh: 1.70, total_co2e: 25.20, total_kontributor: 3 },
-  'Jembrana': { total_kg: 20.00, total_kwh: 0, total_co2e: 6.00, total_kontributor: 2 }
+  'Badung': { total_kg: 1450.50, total_kwh: 310.20, total_co2e: 520.10, total_kontributor: 148 },
+  'Denpasar': { total_kg: 1120.30, total_kwh: 245.80, total_co2e: 410.50, total_kontributor: 122 },
+  'Gianyar': { total_kg: 680.40, total_kwh: 112.50, total_co2e: 320.40, total_kontributor: 82 },
+  'Tabanan': { total_kg: 450.20, total_kwh: 32.40, total_co2e: 280.60, total_kontributor: 55 },
+  'Klungkung': { total_kg: 180.60, total_kwh: 9.80, total_co2e: 140.20, total_kontributor: 28 },
+  'Bangli': { total_kg: 95.30, total_kwh: 0, total_co2e: 106.70, total_kontributor: 24 },
+  'Karangasem': { total_kg: 72.00, total_kwh: 0, total_co2e: 80.60, total_kontributor: 21 },
+  'Buleleng': { total_kg: 56.50, total_kwh: 1.70, total_co2e: 25.20, total_kontributor: 18 },
+  'Jembrana': { total_kg: 20.00, total_kwh: 0, total_co2e: 6.00, total_kontributor: 15 }
 };
 
 const CACHE_COMMUNITY_STATS = 'pilah_cached_community_stats';

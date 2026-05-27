@@ -9,6 +9,7 @@ import {
 import { Card } from '../components/ui/Card';
 import { KATEGORI_COLORS } from '../lib/constants';
 import { useAuth } from '../context/AuthContext';
+import { LaporAduan } from '../components/features/LaporAduan';
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -34,6 +35,9 @@ export function Home({ logs = [], regency, onNavigate }) {
   // State untuk modal detail profil warga
   const [showProfileModal, setShowProfileModal] = useState(false);
 
+  // State untuk modal Lapor Aduan
+  const [isLaporModalOpen, setIsLaporModalOpen] = useState(false);
+
   const handleOpenOlahModal = (category) => {
     setActiveOlahCategory(category);
   };
@@ -44,7 +48,7 @@ export function Home({ logs = [], regency, onNavigate }) {
 
   // Kunci scroll halaman utama saat modal riwayat dibuka
   useEffect(() => {
-    if (isHistoryModalOpen || activeOlahCategory || showProfileModal) {
+    if (isHistoryModalOpen || activeOlahCategory || showProfileModal || isLaporModalOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -52,7 +56,7 @@ export function Home({ logs = [], regency, onNavigate }) {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isHistoryModalOpen, activeOlahCategory, showProfileModal]);
+  }, [isHistoryModalOpen, activeOlahCategory, showProfileModal, isLaporModalOpen]);
 
   // Kalkulasi statistik subkategori organik dari logs
   const organicBreakdown = useMemo(() => {
@@ -252,6 +256,35 @@ export function Home({ logs = [], regency, onNavigate }) {
               Setiap pilahan sampah dari dapur Anda adalah kontribusi nyata dalam menjaga kesucian alam Bali (<strong>Tri Hita Karana</strong>) sekaligus mendukung terwujudnya kemandirian energi bersih.
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Tombol Aksi Cepat Lapor Sampah Menumpuk / Liar */}
+      <div 
+        onClick={() => {
+          if (isGuest) {
+            alert("Fitur Laporan Aduan hanya tersedia untuk Warga Terdaftar. Silakan daftarkan akun warga Anda 🔒");
+          } else {
+            setIsLaporModalOpen(true);
+          }
+        }}
+        className="bg-gradient-to-r from-orange-50 to-amber-50 border border-brand-orange/20 rounded-3xl p-5 md:p-6 flex items-center justify-between gap-4 cursor-pointer hover:shadow-premium-lg hover:scale-[1.01] active:scale-[0.99] transition-all group shrink-0"
+      >
+        <div className="flex gap-3.5 items-center">
+          <div className="w-12 h-12 rounded-2xl bg-brand-orange/10 text-brand-orange flex items-center justify-center shrink-0 shadow-sm transition-transform duration-300 group-hover:scale-110">
+            <AlertTriangle className="w-6 h-6 stroke-[2.2px] animate-pulse" />
+          </div>
+          <div>
+            <h4 className="text-sm md:text-base font-bold text-brand-dark flex items-center gap-1.5 leading-snug">
+              Temukan Sampah Liar / Pembakaran Sampah?
+            </h4>
+            <p className="text-xs text-brand-textSecondary mt-0.5 leading-relaxed">
+              Ambil foto aduan dan laporkan langsung ke DLH / TPS3R setempat. Tindakan nyata real-time!
+            </p>
+          </div>
+        </div>
+        <div className="w-10 h-10 bg-white border border-brand-orange/15 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-brand-orange/10 group-hover:border-brand-orange/30 transition-all shadow-sm">
+          <ChevronRight className="w-5 h-5 text-brand-orange stroke-[2.5px]" />
         </div>
       </div>
 
@@ -980,6 +1013,11 @@ export function Home({ logs = [], regency, onNavigate }) {
             </button>
           </div>
         </div>
+      , document.body)}
+
+      {/* Modal Lapor Aduan Warga - dirender via Portal */}
+      {isLaporModalOpen && createPortal(
+        <LaporAduan onClose={() => setIsLaporModalOpen(false)} />
       , document.body)}
     </div>
   );

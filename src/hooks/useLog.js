@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { getLogCalculations } from '../lib/calculator';
 import { useAuth } from '../context/AuthContext';
@@ -14,20 +14,33 @@ export function useLog() {
   const [syncing, setSyncing] = useState(false);
   const [regency, setRegency] = useState(() => localStorage.getItem(REGENCY_KEY) || '');
 
+  // Helper untuk menggabungkan dua array log tanpa ada duplikasi ID
+  const deduplicateLogs = (queueArr, mainArr) => {
+    const combined = [...queueArr];
+    const seenIds = new Set(combined.map(item => item.id));
+    mainArr.forEach(item => {
+      if (!seenIds.has(item.id)) {
+        combined.push(item);
+        seenIds.add(item.id);
+      }
+    });
+    return combined;
+  };
+
   // Menyimpan kabupaten asal user (untuk fallback jika profil belum termuat)
   const saveRegency = (newRegency) => {
     localStorage.setItem(REGENCY_KEY, newRegency);
     setRegency(newRegency);
   };
 
-  // Membaca riwayat log (Kombinasi online & offline cache)
+  // Membaca riwayat log (Kombinasi online & offline cache dengan deduping)
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     let localCache = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
     let localQueue = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
     
-    // Tampilkan cache lokal terlebih dahulu agar UI instan merespon
-    const combinedLocal = [...localQueue, ...localCache].sort(
+    // Tampilkan cache lokal terlebih dahulu tanpa duplikasi agar UI instan merespon
+    const combinedLocal = deduplicateLogs(localQueue, localCache).sort(
       (a, b) => new Date(b.created_at) - new Date(a.created_at)
     );
     setLogs(combinedLocal);
@@ -46,8 +59,8 @@ export function useLog() {
         if (data) {
           // Perbarui cache lokal dengan data terbaru dari Supabase
           localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-          // Gabungkan antrean lokal yang belum disinkron dengan data online terbaru
-          const updatedLogs = [...localQueue, ...data].sort(
+          // Gabungkan antrean lokal yang belum disinkron dengan data online terbaru secara bersih
+          const updatedLogs = deduplicateLogs(localQueue, data).sort(
             (a, b) => new Date(b.created_at) - new Date(a.created_at)
           );
           setLogs(updatedLogs);
@@ -219,27 +232,33 @@ export function useLog() {
     }
   }, [user, fetchLogs]);
 
+  // Gunakan ref untuk menghindari stale closure dan loop pemanggilan ketika state syncing berubah
+  const syncQueueRef = useRef(syncQueue);
+  useEffect(() => {
+    syncQueueRef.current = syncQueue;
+  }, [syncQueue]);
+
   // Detektor koneksi internet: jalankan sinkronisasi otomatis ketika kembali online
   useEffect(() => {
     if (!user || !profile) return;
 
     const handleOnline = () => {
       console.log('[useLog Debug] Koneksi terdeteksi kembali ONLINE. Menjalankan sinkronisasi antrean...');
-      syncQueue();
+      syncQueueRef.current();
     };
 
     window.addEventListener('online', handleOnline);
     
-    // Jalankan sync queue saat pertama kali warga masuk jika terdeteksi online
+    // Jalankan sinkronisasi instan secara andal saat mount/refresh dalam status online
     if (navigator.onLine) {
-      console.log('[useLog Debug] Warga masuk dalam status online. Sinkronisasi antrean...');
-      syncQueue();
+      console.log('[useLog Debug] Warga masuk dalam status online. Sinkronisasi instan...');
+      syncQueueRef.current();
     }
 
     return () => {
       window.removeEventListener('online', handleOnline);
     };
-  }, [user, profile]); // Hapus 'syncQueue' dari dependensi untuk mencegah infinite loop ketika state 'syncing' berubah!
+  }, [user, profile]);
 
   return {
     logs,

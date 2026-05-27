@@ -5,6 +5,7 @@ import { ChoroplethMap } from '../components/ChoroplethMap';
 import { FeedstockGauge } from '../components/FeedstockGauge';
 import { SurgePredictor } from '../components/SurgePredictor';
 import { ReportGenerator } from '../components/ReportGenerator';
+import { IncidentCenter } from '../components/IncidentCenter';
 import baliRegions from '../lib/bali_regions.json';
 import { 
   Trash2, Zap, Leaf, Users, LogOut, 
@@ -12,7 +13,7 @@ import {
   LayoutGrid, Calendar, FileText,
   ChevronLeft, ChevronRight, Search, Filter,
   Activity, Menu, X, ArrowUpRight, Clock, Award,
-  Sunrise, Sun, CloudSun, Moon
+  Sunrise, Sun, CloudSun, Moon, AlertTriangle
 } from 'lucide-react';
 
 
@@ -23,10 +24,10 @@ const BASELINE_REGENCY_STATS = {
   'Gianyar': { total_kg: 680.40, total_kwh: 112.50, total_co2e: 320.40, total_kontributor: 82 },
   'Tabanan': { total_kg: 450.20, total_kwh: 32.40, total_co2e: 280.60, total_kontributor: 55 },
   'Klungkung': { total_kg: 180.60, total_kwh: 9.80, total_co2e: 140.20, total_kontributor: 28 },
-  'Bangli': { total_kg: 95.30, total_kwh: 0, total_co2e: 106.70, total_kontributor: 14 },
-  'Karangasem': { total_kg: 72.00, total_kwh: 0, total_co2e: 80.60, total_kontributor: 11 },
-  'Buleleng': { total_kg: 56.50, total_kwh: 1.70, total_co2e: 25.20, total_kontributor: 10 },
-  'Jembrana': { total_kg: 20.00, total_kwh: 0, total_co2e: 6.00, total_kontributor: 5 }
+  'Bangli': { total_kg: 95.30, total_kwh: 0, total_co2e: 106.70, total_kontributor: 24 },
+  'Karangasem': { total_kg: 72.00, total_kwh: 0, total_co2e: 80.60, total_kontributor: 21 },
+  'Buleleng': { total_kg: 56.50, total_kwh: 1.70, total_co2e: 25.20, total_kontributor: 18 },
+  'Jembrana': { total_kg: 20.00, total_kwh: 0, total_co2e: 6.00, total_kontributor: 15 }
 };
 
 // Generate dummy logs untuk memperlihatkan data bergerak yang stabil dalam mode demo
@@ -510,6 +511,7 @@ export function Dashboard() {
     { id: 'overview', name: 'Ringkasan Analitik', icon: LayoutGrid },
     { id: 'feedstock', name: 'Kualitas Feedstock', icon: Zap },
     { id: 'surge', name: 'Prediksi Hari Raya', icon: Calendar },
+    { id: 'aduan', name: 'Aduan Warga', icon: AlertTriangle },
     { id: 'reports', name: 'Laporan & Audit Log', icon: FileText }
   ];
 
@@ -1155,6 +1157,12 @@ export function Dashboard() {
           {activeTab === 'surge' && (
             <div className="animate-fade-slide">
               <SurgePredictor regency={selectedRegency || 'Badung'} />
+            </div>
+          )}
+
+          {activeTab === 'aduan' && (
+            <div className="animate-fade-slide">
+              <IncidentCenter />
             </div>
           )}
 
