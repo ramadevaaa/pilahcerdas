@@ -205,7 +205,7 @@ export function useAduan() {
   }, [user, profile, fetchAduan, syncing]);
 
   // 3. Menambahkan aduan baru (Dukungan Kompresi & Offline-First)
-  const addAduan = async (fotoFile, kategori, deskripsi, latitude, longitude) => {
+  const addAduan = async (fotoFile, kategori, deskripsi, latitude, longitude, kabupaten, kecamatan = '', desa = '') => {
     if (!profile) {
       throw new Error('Profil warga belum termuat. Mohon tunggu sebentar.');
     }
@@ -235,10 +235,10 @@ export function useAduan() {
 
       const newAduan = {
         id: tempId,
-        kabupaten: profile.kabupaten,
-        kecamatan: profile.kecamatan,
-        desa: profile.desa,
-        banjar: profile.banjar || '',
+        kabupaten,
+        kecamatan,
+        desa,
+        banjar: '',
         kategori,
         deskripsi,
         foto_url: localPhotoBase64, // Fallback render lokal

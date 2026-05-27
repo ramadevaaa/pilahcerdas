@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Camera, MapPin, AlertTriangle, ShieldCheck, X, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
 import { useAduan } from '../../hooks/useAduan';
 import { Card } from '../ui/Card';
+import { BALI_REGENCY_LIST } from '../../lib/constants';
 
 export function LaporAduan({ onClose }) {
   const { addAduan, submitting } = useAduan();
@@ -12,6 +13,9 @@ export function LaporAduan({ onClose }) {
   const [coords, setCoords] = useState(null);
   const [gpsLoading, setGpsLoading] = useState(false);
   const [honestyChecked, setHonestyChecked] = useState(false);
+  const [kabupaten, setKabupaten] = useState('');
+  const [kecamatan, setKecamatan] = useState('');
+  const [desa, setDesa] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -67,6 +71,10 @@ export function LaporAduan({ onClose }) {
       setError('Mohon ambil/unggah foto bukti sampah terlebih dahulu 📸');
       return;
     }
+    if (!kabupaten) {
+      setError('Kabupaten lokasi aduan wajib dipilih 📍');
+      return;
+    }
     if (!coords) {
       setError('Koordinat lokasi GPS diperlukan. Mohon nyalakan GPS ponsel Anda 📍');
       return;
@@ -82,7 +90,10 @@ export function LaporAduan({ onClose }) {
         kategori,
         deskripsi,
         coords.latitude,
-        coords.longitude
+        coords.longitude,
+        kabupaten,
+        kecamatan,
+        desa
       );
       setSuccess(true);
       setTimeout(() => {
@@ -206,6 +217,53 @@ export function LaporAduan({ onClose }) {
               <option value="pembakaran_terbuka">Pembakaran Sampah Terbuka 💨</option>
               <option value="sungai_tercemar">Pembuangan Sampah Liar ke Sungai 🌊</option>
             </select>
+          </div>
+
+          {/* Lokasi Isu Kejadian */}
+          <div className="space-y-3 p-4 bg-brand-light/35 border border-brand-primary/5 rounded-2xl">
+            <span className="text-xs font-bold text-brand-dark uppercase tracking-wider block">📍 Lokasi Kejadian Isu</span>
+            
+            <div className="space-y-1.5">
+              <label htmlFor="aduan-kabupaten" className="text-[10px] font-bold text-brand-textSecondary uppercase tracking-wider block">Kabupaten/Kota (Wajib)</label>
+              <select
+                id="aduan-kabupaten"
+                value={kabupaten}
+                onChange={(e) => setKabupaten(e.target.value)}
+                className="w-full px-3.5 py-2 bg-white border border-brand-light rounded-xl font-semibold text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all cursor-pointer text-xs"
+                disabled={submitting}
+              >
+                <option value="">-- Pilih Kabupaten --</option>
+                {BALI_REGENCY_LIST.map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label htmlFor="aduan-kecamatan" className="text-[10px] font-bold text-brand-textSecondary uppercase tracking-wider block">Kecamatan (Opsional)</label>
+                <input
+                  type="text"
+                  id="aduan-kecamatan"
+                  placeholder="Kecamatan..."
+                  value={kecamatan}
+                  onChange={(e) => setKecamatan(e.target.value)}
+                  className="w-full px-3.5 py-2 bg-white border border-brand-light rounded-xl font-semibold text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs"
+                  disabled={submitting}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="aduan-desa" className="text-[10px] font-bold text-brand-textSecondary uppercase tracking-wider block">Desa/Kelurahan (Opsional)</label>
+                <input
+                  type="text"
+                  id="aduan-desa"
+                  placeholder="Desa..."
+                  value={desa}
+                  onChange={(e) => setDesa(e.target.value)}
+                  className="w-full px-3.5 py-2 bg-white border border-brand-light rounded-xl font-semibold text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all text-xs"
+                  disabled={submitting}
+                />
+              </div>
+            </div>
           </div>
 
           {/* 3. Deskripsi & Patokan Tambahan */}

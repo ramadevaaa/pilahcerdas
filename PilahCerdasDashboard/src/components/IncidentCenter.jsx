@@ -138,6 +138,11 @@ export function IncidentCenter() {
   };
 
   const handleUpdateStatus = async (id, newStatus) => {
+    if (newStatus === 'selesai') {
+      const isConfirmed = window.confirm('Yakin status penanganan aduan ini selesai? Tindakan ini menyatakan bahwa tumpukan sampah di lokasi kejadian telah dibersihkan secara tuntas oleh petugas DLH/TPS3R.');
+      if (!isConfirmed) return;
+    }
+
     if (!isSupabaseConfigured || !supabase) {
       // Mock update local state
       setIncidents(prev => 
