@@ -14,6 +14,10 @@ export function useLog() {
   const [syncing, setSyncing] = useState(false);
   const [regency, setRegency] = useState(() => localStorage.getItem(REGENCY_KEY) || '');
 
+  // Ref untuk guard sinkronisasi — menghindari syncing masuk ke dependency array
+  // (jika syncing masuk dependency, syncQueue dibuat ulang terus saat nilai berubah → infinite loop)
+  const syncingRef = useRef(false);
+
   // Helper untuk menggabungkan dua array log tanpa ada duplikasi ID
   const deduplicateLogs = (queueArr, mainArr) => {
     const combined = [...queueArr];
@@ -74,10 +78,13 @@ export function useLog() {
 
   // Sinkronisasi antrean LocalStorage ke Supabase
   const syncQueue = useCallback(async () => {
-    if (!isSupabaseConfigured || !supabase || syncing || !user || !profile) return;
+    // Gunakan ref sebagai guard agar tidak ada dua sinkronisasi berjalan bersamaan
+    // TANPA menjadikan 'syncing' sebagai dependency (yang menyebabkan infinite loop!)
+    if (!isSupabaseConfigured || !supabase || syncingRef.current || !user || !profile) return;
     const queue = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
     if (queue.length === 0) return;
 
+    syncingRef.current = true;
     setSyncing(true);
     try {
       const failedToSync = [];
@@ -114,9 +121,11 @@ export function useLog() {
     } catch (e) {
       console.error('Error saat sinkronisasi antrean:', e);
     } finally {
+      syncingRef.current = false;
       setSyncing(false);
     }
-  }, [user, profile, fetchLogs, syncing]);
+  // Hapus 'syncing' dari dependencies — kini dijaga via syncingRef untuk mencegah infinite loop
+  }, [user, profile, fetchLogs]);
 
   // Menambah log pemilahan baru secara instan (Offline-First / Cache-First)
   const addLog = async (kategori, beratGram, metodeInput = 'manual', subkategori = []) => {
@@ -238,20 +247,24 @@ export function useLog() {
     syncQueueRef.current = syncQueue;
   }, [syncQueue]);
 
+  // Guard agar sinkronisasi saat mount hanya terjadi SEKALI per session login
+  const hasSyncedOnMount = useRef(false);
+
   // Detektor koneksi internet: jalankan sinkronisasi otomatis ketika kembali online
   useEffect(() => {
     if (!user || !profile) return;
 
     const handleOnline = () => {
-      console.log('[useLog Debug] Koneksi terdeteksi kembali ONLINE. Menjalankan sinkronisasi antrean...');
+      console.log('[useLog] Koneksi kembali ONLINE. Menyinkronkan antrean...');
       syncQueueRef.current();
     };
 
     window.addEventListener('online', handleOnline);
     
-    // Jalankan sinkronisasi instan secara andal saat mount/refresh dalam status online
-    if (navigator.onLine) {
-      console.log('[useLog Debug] Warga masuk dalam status online. Sinkronisasi instan...');
+    // Jalankan sinkronisasi HANYA SEKALI saat mount/refresh — bukan setiap profile berubah
+    if (navigator.onLine && !hasSyncedOnMount.current) {
+      hasSyncedOnMount.current = true;
+      console.log('[useLog] Mount online pertama kali. Menyinkronkan antrean...');
       syncQueueRef.current();
     }
 

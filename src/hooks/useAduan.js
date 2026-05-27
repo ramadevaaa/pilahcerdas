@@ -86,6 +86,7 @@ export function useAduan() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [syncError, setSyncError] = useState(null);
 
   // Helper deduplikasi aduan
   const deduplicateAduan = (queue, cache) => {
@@ -169,14 +170,15 @@ export function useAduan() {
           }
 
           // Unggah record ke tabel pilah_laporan
+          // PENTING: kecamatan & desa dikirim sebagai null jika kosong
+          // agar tidak melanggar constraint DB (kolom bersifat opsional secara bisnis)
           const uploadItem = {
             user_id: user.id,
             kabupaten: item.kabupaten,
-            kecamatan: item.kecamatan,
-            desa: item.desa,
-            banjar: item.banjar,
+            kecamatan: item.kecamatan || null,
+            desa: item.desa || null,
             kategori: item.kategori,
-            deskripsi: item.deskripsi,
+            deskripsi: item.deskripsi || null,
             foto_url: publicUrl,
             latitude: item.latitude,
             longitude: item.longitude,
@@ -184,12 +186,17 @@ export function useAduan() {
             created_at: item.created_at
           };
 
+          console.log('[useAduan] Mengunggah ke Supabase:', uploadItem);
           const { error: dbError } = await supabase.from('pilah_laporan').insert([uploadItem]);
-          if (dbError) throw dbError;
+          if (dbError) {
+            console.error('[useAduan] DB Insert Error:', JSON.stringify(dbError));
+            throw dbError;
+          }
 
         } catch (err) {
-          console.error('Gagal sinkronisasi aduan offline:', err);
-          window.alert(`[Supabase Sync Error] Gagal mengunggah laporan aduan:\n${err.message || err.details || JSON.stringify(err)}`);
+          const errMsg = err.message || err.details || err.hint || JSON.stringify(err);
+          console.error('Gagal sinkronisasi aduan offline:', errMsg);
+          setSyncError(errMsg);
           failedToSync.push(item);
         }
       }
@@ -320,6 +327,7 @@ export function useAduan() {
     loading,
     submitting,
     syncing,
+    syncError,
     addAduan,
     refresh: fetchAduan,
     syncAduanQueue

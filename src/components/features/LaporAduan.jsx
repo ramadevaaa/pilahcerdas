@@ -5,7 +5,7 @@ import { Card } from '../ui/Card';
 import { BALI_REGENCY_LIST } from '../../lib/constants';
 
 export function LaporAduan({ onClose }) {
-  const { addAduan, submitting } = useAduan();
+  const { addAduan, submitting, syncError } = useAduan();
   const [foto, setFoto] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
   const [kategori, setKategori] = useState('tumpukan_liar');
@@ -18,6 +18,13 @@ export function LaporAduan({ onClose }) {
   const [desa, setDesa] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  // Tampilkan syncError dari hook jika upload ke Supabase gagal
+  useEffect(() => {
+    if (syncError) {
+      setError(`Gagal mengunggah ke server: ${syncError}`);
+    }
+  }, [syncError]);
 
   // Ambil lokasi GPS otomatis saat komponen pertama kali termuat
   useEffect(() => {
