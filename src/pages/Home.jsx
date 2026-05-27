@@ -10,6 +10,7 @@ import { Card } from '../components/ui/Card';
 import { KATEGORI_COLORS } from '../lib/constants';
 import { useAuth } from '../context/AuthContext';
 import { LaporAduan } from '../components/features/LaporAduan';
+import { useAduan } from '../hooks/useAduan';
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -21,6 +22,7 @@ function getGreeting() {
 
 export function Home({ logs = [], regency, onNavigate }) {
   const { profile, isGuest, logout } = useAuth();
+  const { aduanList } = useAduan();
   const greeting = getGreeting();
   const GreetIcon = greeting.icon;
 
@@ -37,6 +39,8 @@ export function Home({ logs = [], regency, onNavigate }) {
 
   // State untuk modal Lapor Aduan
   const [isLaporModalOpen, setIsLaporModalOpen] = useState(false);
+  const [laporModalTab, setLaporModalTab] = useState('lapor');
+  const [laporModalExpandedId, setLaporModalExpandedId] = useState(null);
 
   const handleOpenOlahModal = (category) => {
     setActiveOlahCategory(category);
@@ -265,6 +269,8 @@ export function Home({ logs = [], regency, onNavigate }) {
           if (isGuest) {
             alert("Fitur Laporan Aduan hanya tersedia untuk Warga Terdaftar. Silakan daftarkan akun warga Anda 🔒");
           } else {
+            setLaporModalTab('lapor');
+            setLaporModalExpandedId(null);
             setIsLaporModalOpen(true);
           }
         }}
@@ -578,6 +584,98 @@ export function Home({ logs = [], regency, onNavigate }) {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Aduan Lingkungan Saya (Opsi B Widget) */}
+          {!isGuest && (
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-bold text-brand-dark flex items-center gap-2">
+                  <AlertTriangle className="w-4.5 h-4.5 text-brand-orange stroke-[2.5px]" />
+                  Aduan Lingkungan Saya
+                </h2>
+                {aduanList.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setLaporModalTab('riwayat');
+                      setLaporModalExpandedId(null);
+                      setIsLaporModalOpen(true);
+                    }}
+                    className="text-xs font-extrabold text-brand-orange hover:text-brand-dark transition-colors duration-200 cursor-pointer bg-transparent border-0"
+                  >
+                    Lihat Semua
+                  </button>
+                )}
+              </div>
+
+              {aduanList.length === 0 ? (
+                <Card padding="sm" className="bg-brand-light/30 border border-brand-light text-center py-5">
+                  <p className="text-xs text-brand-textSecondary font-semibold">Belum ada aduan lingkungan yang dilaporkan.</p>
+                </Card>
+              ) : (
+                <div className="space-y-2">
+                  {aduanList.slice(0, 3).map((aduan) => {
+                    const kategoriLabels = {
+                      tumpukan_liar: 'Sampah Liar',
+                      tps_penuh: 'TPS Penuh',
+                      pembakaran_terbuka: 'Pembakaran',
+                      sungai_tercemar: 'Sungai Tercemar'
+                    };
+                    const date = new Date(aduan.created_at);
+                    
+                    let badgeClass = 'bg-amber-50 text-amber-600 border-amber-200';
+                    let statusLabel = 'Baru';
+                    if (aduan.status === 'proses') {
+                      badgeClass = 'bg-blue-50 text-blue-600 border-blue-200';
+                      statusLabel = 'Proses';
+                    } else if (aduan.status === 'selesai') {
+                      badgeClass = 'bg-green-50 text-green-700 border-green-200';
+                      statusLabel = 'Selesai';
+                    }
+
+                    return (
+                      <Card
+                        key={aduan.id}
+                        padding="sm"
+                        hoverable
+                        onClick={() => {
+                          setLaporModalTab('riwayat');
+                          setLaporModalExpandedId(aduan.id);
+                          setIsLaporModalOpen(true);
+                        }}
+                        className="flex items-center justify-between cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl overflow-hidden shrink-0 bg-brand-light relative border border-brand-light/40">
+                            <img src={aduan.foto_url} alt="Aduan" className="w-full h-full object-cover" />
+                            {aduan.isOffline && (
+                              <span className="absolute inset-0 bg-black/55 text-[8px] text-brand-orange font-black flex items-center justify-center text-center">Lokal</span>
+                            )}
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-brand-dark leading-tight block">
+                              {kategoriLabels[aduan.kategori] || aduan.kategori}
+                            </span>
+                            <p className="text-[10px] text-brand-textSecondary mt-0.5 max-w-[150px] truncate">
+                              📍 {aduan.kabupaten}{aduan.kecamatan && `, Kec. ${aduan.kecamatan}`}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col items-end gap-1">
+                          <span className={`px-2 py-0.5 text-[8px] font-black rounded-full border uppercase tracking-wider ${badgeClass}`}>
+                            {statusLabel}
+                          </span>
+                          <span className="text-[9px] text-brand-textMuted font-bold">
+                            {date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                          </span>
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1017,7 +1115,11 @@ export function Home({ logs = [], regency, onNavigate }) {
 
       {/* Modal Lapor Aduan Warga - dirender via Portal */}
       {isLaporModalOpen && createPortal(
-        <LaporAduan onClose={() => setIsLaporModalOpen(false)} />
+        <LaporAduan 
+          initialTab={laporModalTab} 
+          initialExpandedId={laporModalExpandedId} 
+          onClose={() => setIsLaporModalOpen(false)} 
+        />
       , document.body)}
     </div>
   );
