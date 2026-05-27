@@ -189,6 +189,7 @@ export function useAduan() {
 
         } catch (err) {
           console.error('Gagal sinkronisasi aduan offline:', err);
+          window.alert(`[Supabase Sync Error] Gagal mengunggah laporan aduan:\n${err.message || err.details || JSON.stringify(err)}`);
           failedToSync.push(item);
         }
       }
